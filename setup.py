@@ -15,6 +15,10 @@ setup(
     license='GPL',
     packages=find_packages('src'),
     package_dir={ '' : 'src' },
+    scripts=[
+        'src/scripts/pymsfconsole',
+        'src/scripts/pymsfrpc'
+    ],
     install_requires=[
         'msgpack-python>=0.1.12'
     ],
