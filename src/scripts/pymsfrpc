@@ -5,8 +5,8 @@ from atexit import register
 from os import path
 import readline
 
-from sploitego.metasploit.msfrpc import MsfRpcClient, MsfRpcError
-from sploitego.metasploit.utils import parseargs
+from metasploit.msfrpc import MsfRpcClient, MsfRpcError
+from metasploit.utils import parseargs
 
 __author__ = 'Nadeem Douba'
 __copyright__ = 'Copyright 2012, Cygnos Corporation'

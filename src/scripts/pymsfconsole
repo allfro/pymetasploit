@@ -6,9 +6,9 @@ from sys import stdout
 from os import path
 import readline
 
-from sploitego.metasploit.msfrpc import MsfRpcClient, MsfRpcError
-from sploitego.metasploit.msfconsole import MsfRpcConsole
-from sploitego.metasploit.utils import parseargs
+from metasploit.msfrpc import MsfRpcClient, MsfRpcError
+from metasploit.msfconsole import MsfRpcConsole
+from metasploit.utils import parseargs
 
 __author__ = 'Nadeem Douba'
 __copyright__ = 'Copyright 2012, Cygnos Corporation'
