@@ -7,10 +7,10 @@ from msgpack import packb, unpackb
 
 __author__ = 'Nadeem Douba'
 __copyright__ = 'Copyright 2012, PyMetasploit Project'
-__credits__ = [ 'Nadeem Douba' ]
+__credits__ = []
 
 __license__ = 'GPL'
-__version__ = '0.1'
+__version__ = '0.3'
 __maintainer__ = 'Nadeem Douba'
 __email__ = 'ndouba@gmail.com'
 __status__ = 'Development'
@@ -51,7 +51,9 @@ __all__ = [
     'ShellSession',
     'SessionManager',
     'MsfConsole',
-    'ConsoleManager'
+    'ConsoleManager',
+    'ReportFilter',
+    'ReportFilterQuery'
 ]
 
 
@@ -193,18 +195,16 @@ class MsfRpcClient(object):
         - server : the remote server IP address hosting msfrpcd (default: localhost)
         - ssl : if true uses SSL else regular HTTP (default: SSL enabled)
         """
-        self.password = password
-        self.username = kwargs.get('username', 'msf')
         self.uri = kwargs.get('uri', '/api/')
         self.port = kwargs.get('port', 55553)
         self.server = kwargs.get('server', '127.0.0.1')
         self.ssl = kwargs.get('ssl', True)
-        self.sessionid = None
+        self.sessionid = kwargs.get('token')
         if self.ssl:
             self.client = HTTPSConnection(self.server, self.port)
         else:
             self.client = HTTPConnection(self.server, self.port)
-        self.login()
+        self.login(kwargs.get('username', 'msf'), password)
 
     def call(self, method, *args):
         """
@@ -301,16 +301,22 @@ class MsfRpcClient(object):
         """
         return AuthManager(self)
 
-    def login(self):
+    def login(self, username, password):
         """
         Authenticates and reauthenticates the user to msfrpcd.
         """
-        r = self.call(MsfRpcMethod.AuthLogin, self.username, self.password)
-        try:
-            if r['result'] == 'success':
-                self.sessionid = r['token']
-        except KeyError:
-            raise MsfRpcError('Login failed.')
+        if self.sessionid is None:
+            r = self.call(MsfRpcMethod.AuthLogin, username, password)
+            try:
+                if r['result'] == 'success':
+                    self.sessionid = r['token']
+            except KeyError:
+                raise MsfRpcError('Login failed.')
+        else:
+            try:
+                r = self.call(MsfRpcMethod.DbStatus)
+            except MsfRpcError:
+                raise MsfRpcError('Login failed.')
 
     def logout(self):
         """
@@ -1671,14 +1677,28 @@ class MsfSession(object):
         return self.rpc.call(MsfRpcMethod.SessionCompatibleModules, self.id)['modules']
 
     @property
-    def history(self):
+    def ring(self):
+        return SessionRing(self.rpc, self.id)
+
+
+class SessionRing(object):
+
+    def __init__(self, rpc, sessionid):
+        self.rpc = rpc
+        self.id = sessionid
+
+    def read(self, seq=None):
         """
-        Session command history.
+        Reads the session ring.
+
+        Optional Keyword Arguments:
+        - seq : the sequence ID of the ring (default: 0)
         """
+        if seq is not None:
+            return self.rpc.call(MsfRpcMethod.SessionRingRead, self.id, seq)
         return self.rpc.call(MsfRpcMethod.SessionRingRead, self.id)
 
-    @history.setter
-    def history(self, line):
+    def put(self, line):
         """
         Add a command to the session history.
 
@@ -1688,15 +1708,15 @@ class MsfSession(object):
         self.rpc.call(MsfRpcMethod.SessionRingPut, self.id, line)
 
     @property
-    def lastcommand(self):
+    def last(self):
         """
-        Show the last line in the session history.
+        Returns the last sequence ID in the session ring.
         """
-        return self.rpc.call(MsfRpcMethod.SessionRingLast, self.id)
+        return int(self.rpc.call(MsfRpcMethod.SessionRingLast, self.id)['seq'])
 
-    def clearhistory(self):
+    def clear(self):
         """
-        Clear the session history.
+        Clear the session ring.
         """
         return self.rpc.call(MsfRpcMethod.SessionRingClear, self.id)
 
@@ -1784,11 +1804,11 @@ class ShellSession(MsfSession):
         """
         self.rpc.call(MsfRpcMethod.SessionShellWrite, self.id, data)
 
-    def upgrade(self):
+    def upgrade(self, lhost, lport):
         """
         Upgrade the current shell session.
         """
-        self.rpc.call(MsfRpcMethod.SessionShellUpgrade, self.id)
+        self.rpc.call(MsfRpcMethod.SessionShellUpgrade, self.id, lhost, lport)
         return self.read()
 
 

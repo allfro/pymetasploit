@@ -9,7 +9,7 @@ def read(fname):
 setup(
     name='pymetasploit',
     author='Nadeem Douba',
-    version='1.0',
+    version='1.1',
     author_email='ndouba@gmail.com',
     description='A full-fledged msfrpc library for Metasploit framework.',
     license='GPL',

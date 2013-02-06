@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
 from threading import Timer, Lock
+from msfrpc import ShellSession
 
 __author__ = 'Nadeem Douba'
 __copyright__ = 'Copyright 2012, Cygnos Corporation'
-__credits__ = ['Nadeem Douba']
+__credits__ = []
 
 __license__ = 'GPL'
-__version__ = '0.1'
+__version__ = '0.3'
 __maintainer__ = 'Nadeem Douba'
 __email__ = 'ndouba@cygnos.com'
 __status__ = 'Development'
@@ -17,9 +18,15 @@ __all__ = [
 ]
 
 
+class MsfRpcConsoleType:
+    Console = 0
+    Meterpreter = 1
+    Shell = 2
+
+
 class MsfRpcConsole(object):
 
-    def __init__(self, rpc, cb=None):
+    def __init__(self, rpc, sessionid=None, cb=None):
         """
         Emulates the msfconsole in msf except over RPC.
 
@@ -29,11 +36,21 @@ class MsfRpcConsole(object):
         Optional Arguments:
         - cb : a callback function that gets called when data is received from the console.
         """
-        self.console = rpc.consoles.console()
+
         self.callback = cb
+
+        if sessionid is not None:
+            self.console = rpc.sessions.session(sessionid)
+            self.type_ = MsfRpcConsoleType.Shell if isinstance(self.console, ShellSession) else MsfRpcConsoleType.Meterpreter
+            self.prompt = '>>> '
+            self.callback(dict(data='', prompt=self.prompt))
+        else:
+            self.console = rpc.consoles.console()
+            self.type_ = MsfRpcConsoleType.Console
+            self.prompt = ''
+
         self.lock = Lock()
         self.running = True
-        self.prompt = ''
         self._poller()
 
     def _poller(self):
@@ -42,12 +59,20 @@ class MsfRpcConsole(object):
             return
         d = self.console.read()
         self.lock.release()
-        if d['data'] or self.prompt != d['prompt']:
-            self.prompt = d['prompt']
-            if self.callback is not None:
-                self.callback(d)
-            else:
-                print d['data']
+
+        if self.type_ == MsfRpcConsoleType:
+            if d['data'] or self.prompt != d['prompt']:
+                self.prompt = d['prompt']
+                if self.callback is not None:
+                    self.callback(d)
+                else:
+                    print d['data']
+        else:
+            if d:
+                if self.callback is not None:
+                    self.callback(dict(data=d, prompt=self.prompt))
+                else:
+                    print d
         Timer(0.5, self._poller).start()
 
     def execute(self, command):
@@ -65,6 +90,7 @@ class MsfRpcConsole(object):
 
     def __del__(self):
         self.lock.acquire()
-        self.console.destroy()
+        if self.type_ == MsfRpcConsoleType.Console:
+            self.console.destroy()
         self.running = False
         self.lock.release()
