@@ -60,7 +60,7 @@ class MsfRpcConsole(object):
         d = self.console.read()
         self.lock.release()
 
-        if self.type_ == MsfRpcConsoleType:
+        if self.type_ == MsfRpcConsoleType.Console:
             if d['data'] or self.prompt != d['prompt']:
                 self.prompt = d['prompt']
                 if self.callback is not None:
