@@ -10,7 +10,7 @@ __copyright__ = 'Copyright 2012, PyMetasploit Project'
 __credits__ = []
 
 __license__ = 'GPL'
-__version__ = '0.3'
+__version__ = '0.4'
 __maintainer__ = 'Nadeem Douba'
 __email__ = 'ndouba@gmail.com'
 __status__ = 'Development'
@@ -1052,7 +1052,7 @@ class WorkspaceManager(MsfManager):
 
 class DbManager(MsfManager):
 
-    def connect(self, username, database='msf', server='localhost', driver='postgresql', **kwargs):
+    def connect(self, username, database='msf', **kwargs):
         """
         Connects to a database and creates the msf schema if necessary.
 
@@ -1060,14 +1060,15 @@ class DbManager(MsfManager):
         - username : the username for the database connection
 
         Optional Keyword Arguments:
-        - server : the IP or hostname of the database server (default: 'localhost')
+        - host : the IP or hostname of the database server (default: 'localhost')
         - driver : the driver to use for the database connection (default: 'postgresql')
         - password : the password for the database connection
         - database : the database name (default: 'msf')
+        - port : the port that the server is running on (default: 5432)
         """
-        runopts = { 'username': username, 'server' : server, 'database' : database, 'driver' : driver }
+        runopts = { 'username': username, 'database' : database }
         runopts.update(kwargs)
-        self.rpc.call(MsfRpcMethod.DbConnect, runopts)
+        return self.rpc.call(MsfRpcMethod.DbConnect, runopts)['result'] == 'success'
 
     @property
     def driver(self):
