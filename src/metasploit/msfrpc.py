@@ -1440,24 +1440,34 @@ class MsfModule(object):
         - payload : the payload of an exploit module (this is mandatory if the module is an exploit).
         - **kwargs : can contain any module options.
         """
-        runopts = {}
-        runopts.update(self.runoptions)
+        runopts = self.runoptions.copy()
         if isinstance(self, ExploitModule):
-            if 'payload' in kwargs:
-                if isinstance(kwargs['payload'], PayloadModule):
-                    payload = kwargs['payload']
+            payload = kwargs.get('payload')
+            runopts['TARGET'] = self.target
+            if 'DisablePayloadHandler' in runopts and runopts['DisablePayloadHandler']:
+                pass
+            elif payload is None:
+                runopts['DisablePayloadHandler'] = True
+            else:
+                if isinstance(payload, PayloadModule):
+                    if payload.modulename not in self.payloads:
+                        raise ValueError(
+                            'Invalid payload (%s) for given target (%d).' % (payload.modulename, self.target)
+                        )
                     runopts['PAYLOAD'] = payload.modulename
-                    if 'RHOST' in payload.runoptions:
-                        del payload['RHOST']
-                    if 'WORKSPACE' in payload.runoptions:
-                        del payload['WORKSPACE']
-                    runopts.update(payload.runoptions)
-                elif isinstance(kwargs['payload'], basestring):
-                    runopts['PAYLOAD'] = kwargs['payload']
+                    for k, v in payload.runoptions.iteritems():
+                        if v is None or (isinstance(v, basestring) and not v):
+                            continue
+                        if k not in runopts or runopts[k] is None or \
+                           (isinstance(runopts[k], basestring) and not runopts[k]):
+                            runopts[k] = v
+#                    runopts.update(payload.runoptions)
+                elif isinstance(payload, basestring):
+                    if payload not in self.payloads:
+                        raise ValueError('Invalid payload (%s) for given target (%d).' % (payload, self.target))
+                    runopts['PAYLOAD'] = payload
                 else:
                     raise TypeError("Expected type str or PayloadModule not '%s'" % type(kwargs['payload']).__name__)
-            else:
-                raise TypeError('Exploit modules require Payload modules to execute.')
 
         return self.rpc.call(MsfRpcMethod.ModuleExecute, self.moduletype, self.modulename, runopts)
 
@@ -1473,13 +1483,25 @@ class ExploitModule(MsfModule):
         - exploit : the name of the exploit module.
         """
         super(ExploitModule, self).__init__(rpc, 'exploit', exploit)
+        self._target = self._info.get('default_target', 0)
 
     @property
     def payloads(self):
         """
         A list of compatible payloads.
         """
-        return self.rpc.call(MsfRpcMethod.ModuleCompatiblePayloads, self.modulename)['payloads']
+#        return self.rpc.call(MsfRpcMethod.ModuleCompatiblePayloads, self.modulename)['payloads']
+        return self.targetpayloads(self.target)
+
+    @property
+    def target(self):
+        return self._target
+
+    @target.setter
+    def target(self, target):
+        if target not in self.targets:
+            raise ValueError('Target must be one of %s' % repr(self.targets.keys()))
+        self._target = target
 
     def targetpayloads(self, t=0):
         """
