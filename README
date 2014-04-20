@@ -56,7 +56,9 @@ $ ./msfrpcd -P mypassword -n -f -a 127.0.0.1
 The `-f` parameter tells `msfrpcd` to remain in the foreground and the `-n` parameter disables database support.
 Finally, the `-a` parameter tells `msfrcpd` to listen for requests only on the local loopback interface (`127.0.0.1`).
 
-## Connecting to `msfrpcd`
+## `MsfRpcClient` - Brief Overview
+
+### Connecting to `msfrpcd`
 
 Let's get started interacting with the Metasploit framework from python:
 
@@ -64,8 +66,6 @@ Let's get started interacting with the Metasploit framework from python:
 >>> from metasploit.msfrpc import MsfRpcClient
 >>> client = MsfRpcClient('mypassword')
 ```
-
-## `MsfRpcClient` - Brief Overview
 
 The `MsfRpcClient` class provides the core functionality to navigate through the Metasploit framework. Let's take a
 look at its underbelly:
@@ -211,4 +211,4 @@ comes great responsibility – unless you are a banker.
 
 # Questions?
 
-Email me at <ndouba.at.gmail.com>
+Email me at ndouba.at.gmail.com
