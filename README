@@ -200,8 +200,8 @@ the one we received when executing the module earlier (`exploit.execute()`). Let
 
 ```python
 >>> shell = client.sessions.session(1)
->>> s.write('whoami\n')
->>> print s.read()
+>>> shell.write('whoami\n')
+>>> print shell.read()
 root
 >>> # Happy dance!
 ```
