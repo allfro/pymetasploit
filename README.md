@@ -211,4 +211,4 @@ comes great responsibility – unless you are a banker.
 
 # Questions?
 
-Email me at <ndouba.at.gmail.com>
+Email me at ndouba.at.gmail.com
