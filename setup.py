@@ -24,5 +24,5 @@ setup(
     ],
     url='https://github.com/allfro/pymetasploit',
     download_url='https://github.com/allfro/pymetasploit/zipball/master',
-    long_description=read('README.md')
+    long_description=read('README')
 )
