@@ -196,7 +196,7 @@ class MsfRpcClient(object):
         - ssl : if true uses SSL else regular HTTP (default: SSL enabled)
         """
         self.uri = kwargs.get('uri', '/api/')
-        self.port = kwargs.get('port', 55553)
+        self.port = kwargs.get('port', 55552)
         self.server = kwargs.get('server', '127.0.0.1')
         self.ssl = kwargs.get('ssl', True)
         self.sessionid = kwargs.get('token')
