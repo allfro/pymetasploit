@@ -50,11 +50,10 @@ class MsfConsole(InteractiveConsole):
     def callback(self, d):
         stdout.write('\n%s' % d['data'])
         if not self.fl:
-            stdout.write('\n%s' % d['prompt'])
+            stdout.write('\n%s' % d['prompt'].replace("\x01\x02", ""))
             stdout.flush()
         else:
             self.fl = False
-
 
 if __name__ == '__main__':
     o = parseargs()
