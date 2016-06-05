@@ -334,7 +334,7 @@ class MsfRpcClient(object):
 		Authenticates and reauthenticates the user to msfrpcd.
 		"""
 		if self.sessionid is None:
-			r = self.call(MsfRpcMethod.AuthLogin, username, password);print(r)
+			r = self.call(MsfRpcMethod.AuthLogin, username, password);
 			try:
 				if r['result'] == 'success':
 					self.sessionid = r['token']
