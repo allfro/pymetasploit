@@ -1450,6 +1450,15 @@ class MsfModule(object):
         if isinstance(self, ExploitModule):
             payload = kwargs.get('payload')
             runopts['TARGET'] = self.target
+            """
+            Define Runtime Options set as part of the execution argument 
+            - For use when a payload requires additional options that can
+            - not be set as part of the exploit, for instance LHOST and LPORT
+            - for a meterpreter/reverse_tcp session. Add more lines for extra
+            - options
+            """
+            if kwargs.get('LHOST'): runopts['LHOST'] = kwargs.get('LHOST')
+            if kwargs.get('LPORT'): runopts['LPORT'] = kwargs.get('LPORT')
             if 'DisablePayloadHandler' in runopts and runopts['DisablePayloadHandler']:
                 pass
             elif payload is None:
