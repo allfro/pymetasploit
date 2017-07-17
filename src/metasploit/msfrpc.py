@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 from http.client import HTTPConnection, HTTPSConnection
 import ssl
 from numbers import Number
@@ -16,8 +15,7 @@ __maintainer__ = 'Nadeem Douba'
 __email__ = 'ndouba@gmail.com'
 __status__ = 'Development'
 
-__all__ = [
-	'MsfRpcError',
+__all__ = ['MsfRpcError',
 	'MsfRpcMethod',
 	'MsfPlugins',
 	'MsfRpcClient',
@@ -54,8 +52,7 @@ __all__ = [
 	'MsfConsole',
 	'ConsoleManager',
 	'ReportFilter',
-	'ReportFilterQuery'
-]
+	'ReportFilterQuery']
 
 
 class MsfRpcError(Exception):
@@ -197,20 +194,20 @@ class MsfRpcClient(object):
         - ssl : if true uses SSL else regular HTTP (default: SSL enabled)
         - verify : if true, verify SSL cert when using SSL (default: False)
         """
-        self.uri = kwargs.get('uri', '/api/')
-        self.port = kwargs.get('port', 55552)
-        self.server = kwargs.get('server', '127.0.0.1')
-        self.ssl = kwargs.get('ssl', True)
-        self.verify_ssl = kwargs.get('verify', False)
-        self.sessionid = kwargs.get('token')
-        if self.ssl:
-            if self.verify_ssl:
-                self.client = HTTPSConnection(self.server, self.port)
-            else:
-                self.client = HTTPSConnection(self.server, self.port, context=ssl._create_unverified_context())
-        else:
-            self.client = HTTPConnection(self.server, self.port)
-        self.login(kwargs.get('username', 'msf'), password)
+		self.uri = kwargs.get('uri', '/api/')
+		self.port = kwargs.get('port', 55552)
+		self.server = kwargs.get('server', '127.0.0.1')
+		self.ssl = kwargs.get('ssl', True)
+		self.verify_ssl = kwargs.get('verify', False)
+		self.sessionid = kwargs.get('token')
+		if self.ssl:
+			if self.verify_ssl:
+				self.client = HTTPSConnection(self.server, self.port)
+			else:
+				self.client = HTTPSConnection(self.server, self.port, context=ssl._create_unverified_context())
+		else:
+			self.client = HTTPConnection(self.server, self.port)
+		self.login(kwargs.get('username', 'msf'), password)
 
 	def unpackb_wrapper(self, data):
 		return self.unpackb_wrapf(data)
@@ -246,7 +243,7 @@ class MsfRpcClient(object):
 
 		Returns : RPC call result
 		"""
-		l = [ method ]
+		l = [method]
 		l.extend(args)
 		if method == MsfRpcMethod.AuthLogin:
 			self.client.request('POST', self.uri, packb(l), self._headers)
@@ -334,7 +331,7 @@ class MsfRpcClient(object):
 		Authenticates and reauthenticates the user to msfrpcd.
 		"""
 		if self.sessionid is None:
-			r = self.call(MsfRpcMethod.AuthLogin, username, password);
+			r = self.call(MsfRpcMethod.AuthLogin, username, password)
 			try:
 				if r['result'] == 'success':
 					self.sessionid = r['token']
@@ -1479,9 +1476,7 @@ class MsfModule(object):
 			else:
 				if isinstance(payload, PayloadModule):
 					if payload.modulename not in self.payloads:
-						raise ValueError(
-							'Invalid payload (%s) for given target (%d).' % (payload.modulename, self.target)
-						)
+						raise ValueError('Invalid payload (%s) for given target (%d).' % (payload.modulename, self.target))
 					runopts['PAYLOAD'] = payload.modulename
 					for k, v in payload.runoptions.items():
 						if v is None or (isinstance(v, str) and not v):
@@ -1518,7 +1513,8 @@ class ExploitModule(MsfModule):
 		"""
 		A list of compatible payloads.
 		"""
-#		 return self.rpc.call(MsfRpcMethod.ModuleCompatiblePayloads, self.modulename)['payloads']
+#		 return self.rpc.call(MsfRpcMethod.ModuleCompatiblePayloads,
+#		 self.modulename)['payloads']
 		return self.targetpayloads(self.target)
 
 	@property
@@ -1885,12 +1881,12 @@ class SessionManager(MsfManager):
 				if s[k]['uuid'] == id:
 					if s[id]['type'] == 'meterpreter':
 						return MeterpreterSession(id, self.rpc, s)
-					elif s[id]['type']	== 'shell':
+					elif s[id]['type'] == 'shell':
 						return ShellSession(id, self.rpc, s)
 			raise KeyError('Session ID (%s) does not exist' % id)
 		if s[id]['type'] == 'meterpreter':
 			return MeterpreterSession(id, self.rpc, s)
-		elif s[id]['type']	== 'shell':
+		elif s[id]['type'] == 'shell':
 			return ShellSession(id, self.rpc, s)
 		raise NotImplementedError('Could not determine session type: %s' % s[id]['type'])
 
