@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-
-from httplib import HTTPConnection, HTTPSConnection
 from http.client import HTTPConnection, HTTPSConnection
 import ssl
 from numbers import Number
@@ -1336,7 +1334,6 @@ class CoreManager(MsfManager):
 
 class MsfModule(object):
 
-<<<<<<< HEAD
     def __init__(self, rpc, mtype, mname):
         """
         Initializes an msf module object.
@@ -1662,7 +1659,6 @@ class MsfModule(object):
 					raise TypeError("Expected type str or PayloadModule not '%s'" % type(kwargs['payload']).__name__)
 
 		return self.rpc.call(MsfRpcMethod.ModuleExecute, self.moduletype, self.modulename, runopts)
->>>>>>> pr/3
 
 
 class ExploitModule(MsfModule):
