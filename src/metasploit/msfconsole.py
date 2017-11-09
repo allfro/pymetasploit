@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from threading import Timer, Lock
-from msfrpc import ShellSession
+from .msfrpc import ShellSession
 
 __author__ = 'Nadeem Douba'
 __copyright__ = 'Copyright 2012, PyMetasploit Project'
@@ -18,7 +18,7 @@ __all__ = [
 ]
 
 
-class MsfRpcConsoleType:
+class MsfRpcConsoleType(object):
     Console = 0
     Meterpreter = 1
     Shell = 2
@@ -61,18 +61,18 @@ class MsfRpcConsole(object):
         self.lock.release()
 
         if self.type_ == MsfRpcConsoleType.Console:
-            if d['data'] or self.prompt != d['prompt']:
-                self.prompt = d['prompt']
+            if d[b'data'] or self.prompt != d[b'prompt']:
+                self.prompt = d[b'prompt']
                 if self.callback is not None:
                     self.callback(d)
                 else:
-                    print d['data']
+                    print(d[b'data'])
         else:
             if d:
                 if self.callback is not None:
                     self.callback(dict(data=d, prompt=self.prompt))
                 else:
-                    print d
+                    print(d)
         Timer(0.5, self._poller).start()
 
     def execute(self, command):
