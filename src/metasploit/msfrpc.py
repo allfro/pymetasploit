@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from http.client import HTTPConnection, HTTPSConnection
+from httplib import HTTPConnection, HTTPSConnection
 import ssl
 from numbers import Number
 
