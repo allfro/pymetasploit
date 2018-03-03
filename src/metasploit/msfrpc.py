@@ -1328,8 +1328,10 @@ class MsfModule(object):
         self.modulename = mname
         self.rpc = rpc
         self._info = rpc.call(MsfRpcMethod.ModuleInfo, mtype, mname)
+        property_attributes = ["advanced", "evasion", "options", "required", "runoptions"]
         for k in self._info:
-            setattr(self, k, self._info.get(k))
+            if k not in propery_attributes):
+                setattr(self, k, self._info.get(k))
         self._moptions = rpc.call(MsfRpcMethod.ModuleOptions, mtype, mname)
         self._roptions = []
         self._aoptions = []
@@ -1944,7 +1946,7 @@ class ConsoleManager(MsfManager):
         """
         A list of active consoles.
         """
-        return self.rpc.call(MsfRpcMethod.ConsoleList)
+        return self.rpc.call(MsfRpcMethod.ConsoleList)['consoles']
 
     def console(self, cid=None):
         """
@@ -1953,7 +1955,7 @@ class ConsoleManager(MsfManager):
         Optional Keyword Arguments:
         - cid : the console identifier.
         """
-        s = self.list
+        s = [x['id'] for x in self.list['consoles']]
         if cid is None:
             return MsfConsole(self.rpc)
         if cid not in s:
