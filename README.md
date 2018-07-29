@@ -1,12 +1,12 @@
 PyMetasploit for Python 3 - a full-fledged msfrpc library for Python
-===
+=======
 
 PyMetasploit is a full-fledged `msfrpc` library for Python. It is meant to interact with the msfrpcd daemon that comes
 with the latest versions of Metasploit. It does NOT interact with the console-based scripts that Metasploit provides
 such as msfconsole, msfvenom, etc. Therefore, before you can begin to use this library, you'll need to initialize
 `msfrpcd` and optionally (highly recommended) PostgreSQL.
 
-# Python 3 update
+# Update for Python 3
 
 This is a forked and updated version of PyMetasploit for Python 3.
 See example.py and the tutorial below for more information.
