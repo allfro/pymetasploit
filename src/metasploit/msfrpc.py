@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-from httplib import HTTPConnection, HTTPSConnection
+from http.client import HTTPConnection, HTTPSConnection
 import ssl
 from numbers import Number
 
-from msgpack import packb, unpackb
-
+from .msgpacks import packs, unpacks
+from msgpack import packb
 __author__ = 'Nadeem Douba'
 __copyright__ = 'Copyright 2012, PyMetasploit Project'
 __credits__ = []
@@ -52,9 +52,7 @@ __all__ = [
     'ShellSession',
     'SessionManager',
     'MsfConsole',
-    'ConsoleManager',
-    'ReportFilter',
-    'ReportFilterQuery'
+    'ConsoleManager'
 ]
 
 
@@ -190,7 +188,7 @@ class MsfRpcClient(object):
         - password : the password used to authenticate to msfrpcd
 
         Optional Keyword Arguments:
-        - username : the username used to authenticate to msfrpcd (default: msf)
+        - username : the username used to authenticate to msfrpcd (default: msf)msfrpcd -P mypassword -n -f -a 127.0.0.1
         - uri : the msfrpcd URI (default: /api/)
         - port : the remote msfrpcd port to connect to (default: 55553)
         - server : the remote server IP address hosting msfrpcd (default: localhost)
@@ -224,20 +222,22 @@ class MsfRpcClient(object):
 
         Returns : RPC call result
         """
+
+
         l = [ method ]
         l.extend(args)
         if method == MsfRpcMethod.AuthLogin:
-            self.client.request('POST', self.uri, packb(l), self._headers)
+            self.client.request('POST', self.uri, packs(l), self._headers)
             r = self.client.getresponse()
             if r.status == 200:
-                return unpackb(r.read())
+                return unpacks(r.read())
             raise MsfRpcError('An unknown error has occurred while logging in.')
         elif self.authenticated:
             l.insert(1, self.sessionid)
-            self.client.request('POST', self.uri, packb(l), self._headers)
+            self.client.request('POST', self.uri, packs(l), self._headers)
             r = self.client.getresponse()
             if r.status == 200:
-                result = unpackb(r.read())
+                result = unpacks(r.read())
                 if 'error' in result:
                     raise MsfRpcError(result['error_message'])
                 return result
@@ -974,7 +974,7 @@ class Workspace(object):
         self.rpc.call(MsfRpcMethod.DbImportData, {'workspace' : self.name, 'data' : data})
 
     def importfile(self, fname):
-        r = file(fname, mode='rb')
+        r = file(fname, mode='r')
         self.rpc.call(MsfRpcMethod.DbImportData, {'workspace' : self.name, 'data' : r.read()})
         r.close()
 
@@ -1074,7 +1074,8 @@ class DbManager(MsfManager):
         """
         runopts = { 'username': username, 'database' : database }
         runopts.update(kwargs)
-        return self.rpc.call(MsfRpcMethod.DbConnect, runopts)['result'] == 'success'
+        res=self.rpc.call(MsfRpcMethod.DbConnect, runopts)
+        return res['result'] == 'success'
 
     @property
     def driver(self):
@@ -1235,6 +1236,7 @@ class JobManager(MsfManager):
 
 
 class CoreManager(MsfManager):
+    
 
     @property
     def version(self):
@@ -1324,12 +1326,16 @@ class MsfModule(object):
         - mtype : the module type (e.g. 'exploit')
         - mname : the module name (e.g. 'exploits/windows/http/icecast_header')
         """
+
         self.moduletype = mtype
         self.modulename = mname
         self.rpc = rpc
         self._info = rpc.call(MsfRpcMethod.ModuleInfo, mtype, mname)
+        property_attributes = ["advanced", "evasion", "options", "required","runoptions"]
         for k in self._info:
-            setattr(self, k, self._info.get(k))
+            if k not in property_attributes:
+                # don't try to set property attributes
+                setattr(self, k, self._info.get(k))
         self._moptions = rpc.call(MsfRpcMethod.ModuleOptions, mtype, mname)
         self._roptions = []
         self._aoptions = []
@@ -1350,7 +1356,7 @@ class MsfModule(object):
         """
         All the module options.
         """
-        return self._moptions.keys()
+        return list(self._moptions.keys())
 
     @property
     def required(self):
@@ -1379,7 +1385,7 @@ class MsfModule(object):
         The running (currently set) options for a module. This will raise an error
         if some of the required options are missing.
         """
-        outstanding = set(self.required).difference(self._runopts.keys())
+        outstanding = set(self.required).difference(list(self._runopts.keys()))
         if outstanding:
             raise TypeError('Module missing required parameter: %s' % ', '.join(outstanding))
         return self._runopts
@@ -1412,6 +1418,7 @@ class MsfModule(object):
         - key : the option name.
         - value : the option value.
         """
+
         if key not in self.options:
             raise KeyError("Invalid option '%s'." % key)
         elif 'enums' in self._moptions[key] and value not in self._moptions[key]['enums']:
@@ -1461,14 +1468,14 @@ class MsfModule(object):
                             'Invalid payload (%s) for given target (%d).' % (payload.modulename, self.target)
                         )
                     runopts['PAYLOAD'] = payload.modulename
-                    for k, v in payload.runoptions.iteritems():
-                        if v is None or (isinstance(v, basestring) and not v):
+                    for k, v in payload.runoptions.items():
+                        if v is None or (isinstance(v, str) and not v):
                             continue
                         if k not in runopts or runopts[k] is None or \
-                           (isinstance(runopts[k], basestring) and not runopts[k]):
+                           (isinstance(runopts[k], str) and not runopts[k]):
                             runopts[k] = v
 #                    runopts.update(payload.runoptions)
-                elif isinstance(payload, basestring):
+                elif isinstance(payload, str):
                     if payload not in self.payloads:
                         raise ValueError('Invalid payload (%s) for given target (%d).' % (payload, self.target))
                     runopts['PAYLOAD'] = payload
@@ -1506,7 +1513,7 @@ class ExploitModule(MsfModule):
     @target.setter
     def target(self, target):
         if target not in self.targets:
-            raise ValueError('Target must be one of %s' % repr(self.targets.keys()))
+            raise ValueError('Target must be one of %s' % repr(list(self.targets.keys())))
         self._target = target
 
     def targetpayloads(self, t=0):
@@ -1955,6 +1962,7 @@ class ConsoleManager(MsfManager):
         """
         s = self.list
         if cid is None:
+
             return MsfConsole(self.rpc)
         if cid not in s:
             raise KeyError('Console ID (%s) does not exist' % cid)
