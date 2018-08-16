@@ -1822,7 +1822,7 @@ class ShellSession(MsfSession):
         """
         Read data from the shell session.
         """
-        return self.rpc.call(MsfRpcMethod.SessionShellRead, self.id)['data']
+        return self.rpc.call(MsfRpcMethod.SessionShellRead, self.id).get(b'write_count')
 
     def write(self, data):
         """
