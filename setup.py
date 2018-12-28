@@ -3,8 +3,10 @@
 from setuptools import setup, find_packages
 from os import path
 
+
 def read(fname):
     return open(path.join(path.dirname(__file__), fname)).read()
+
 
 setup(
     name='pymetasploit',
@@ -14,10 +16,10 @@ setup(
     description='A full-fledged msfrpc library for Metasploit framework.',
     license='GPL',
     packages=find_packages('src'),
-    package_dir={ '' : 'src' },
+    package_dir={'': 'src'},
     scripts=[
-        'src/scripts/pymsfconsole',
-        'src/scripts/pymsfrpc'
+        'src/pymsfconsole.py',
+        'src/pymsfrpc.py'
     ],
     install_requires=[
         'msgpack-python>=0.1.12'
