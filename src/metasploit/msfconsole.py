@@ -51,7 +51,7 @@ class MsfRpcConsole(object):
 
         self.lock = Lock()
         self.running = True
-        self._poller()
+        Timer(0.5, self._poller).start()
 
     def _poller(self):
         self.lock.acquire()
@@ -73,7 +73,6 @@ class MsfRpcConsole(object):
                     self.callback(dict(data=d, prompt=self.prompt))
                 else:
                     print d
-        Timer(0.5, self._poller).start()
 
     def execute(self, command):
         """
