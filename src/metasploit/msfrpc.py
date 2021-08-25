@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from httplib import HTTPConnection, HTTPSConnection
+from http.client import HTTPConnection, HTTPSConnection
 import ssl
 from numbers import Number
 
@@ -53,8 +53,6 @@ __all__ = [
     'SessionManager',
     'MsfConsole',
     'ConsoleManager',
-    'ReportFilter',
-    'ReportFilterQuery'
 ]
 
 
@@ -974,9 +972,8 @@ class Workspace(object):
         self.rpc.call(MsfRpcMethod.DbImportData, {'workspace' : self.name, 'data' : data})
 
     def importfile(self, fname):
-        r = file(fname, mode='rb')
-        self.rpc.call(MsfRpcMethod.DbImportData, {'workspace' : self.name, 'data' : r.read()})
-        r.close()
+        with open(fname, "rb") as f:
+            self.rpc.call(MsfRpcMethod.DbImportData, {'workspace': self.name, 'data': f.read()})
 
 
 class MsfManager(object):
@@ -1464,7 +1461,8 @@ class MsfModule(object):
                             'Invalid payload (%s) for given target (%d).' % (payload.modulename, self.target)
                         )
                     runopts['PAYLOAD'] = payload.modulename
-                    for k, v in payload.runoptions.iteritems():
+
+                    for k, v in payload.runoptions.items():
                         if v is None or (isinstance(v, basestring) and not v):
                             continue
                         if k not in runopts or runopts[k] is None or \
