@@ -1463,13 +1463,13 @@ class MsfModule(object):
                     runopts['PAYLOAD'] = payload.modulename
 
                     for k, v in payload.runoptions.items():
-                        if v is None or (isinstance(v, basestring) and not v):
+                        if v is None or (isinstance(v, str) and not v):
                             continue
                         if k not in runopts or runopts[k] is None or \
-                           (isinstance(runopts[k], basestring) and not runopts[k]):
+                           (isinstance(runopts[k], str) and not runopts[k]):
                             runopts[k] = v
 #                    runopts.update(payload.runoptions)
-                elif isinstance(payload, basestring):
+                elif isinstance(payload, str):
                     if payload not in self.payloads:
                         raise ValueError('Invalid payload (%s) for given target (%d).' % (payload, self.target))
                     runopts['PAYLOAD'] = payload
