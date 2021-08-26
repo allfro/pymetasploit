@@ -4,11 +4,11 @@ from threading import Timer, Lock
 from msfrpc import ShellSession
 
 __author__ = 'Nadeem Douba'
-__copyright__ = 'Copyright 2012, PyMetasploit Project'
+__copyright__ = 'Copyright 2021, PyMetasploit Project'
 __credits__ = []
 
 __license__ = 'GPL'
-__version__ = '0.3'
+__version__ = '2.0'
 __maintainer__ = 'Nadeem Douba'
 __email__ = 'ndouba@cygnos.com'
 __status__ = 'Development'

@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: pymetasploit
-Version: 1.1
+Version: 2.0
 Summary: A full-fledged msfrpc library for Metasploit framework.
 Home-page: https://github.com/allfro/pymetasploit
 Author: Nadeem Douba

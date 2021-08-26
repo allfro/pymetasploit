@@ -7,11 +7,11 @@ from numbers import Number
 from msgpack import packb, unpackb
 
 __author__ = 'Nadeem Douba'
-__copyright__ = 'Copyright 2012, PyMetasploit Project'
+__copyright__ = 'Copyright 2021, PyMetasploit Project'
 __credits__ = []
 
 __license__ = 'GPL'
-__version__ = '0.4'
+__version__ = '2.0'
 __maintainer__ = 'Nadeem Douba'
 __email__ = 'ndouba@gmail.com'
 __status__ = 'Development'
