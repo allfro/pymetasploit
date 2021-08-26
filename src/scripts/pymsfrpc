@@ -43,7 +43,7 @@ if __name__ == '__main__':
     try:
         m = MsfRpc(o.__dict__.pop('password'), **o.__dict__)
         m.interact('')
-    except MsfRpcError, m:
-        print str(m)
+    except MsfRpcError as m:
+        print(str(m))
         exit(-1)
     exit(0)
