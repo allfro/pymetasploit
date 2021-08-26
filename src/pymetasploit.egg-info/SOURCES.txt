@@ -1,0 +1,13 @@
+README
+setup.py
+src/metasploit/__init__.py
+src/metasploit/msfconsole.py
+src/metasploit/msfrpc.py
+src/metasploit/utils.py
+src/pymetasploit.egg-info/PKG-INFO
+src/pymetasploit.egg-info/SOURCES.txt
+src/pymetasploit.egg-info/dependency_links.txt
+src/pymetasploit.egg-info/requires.txt
+src/pymetasploit.egg-info/top_level.txt
+src/scripts/pymsfconsole
+src/scripts/pymsfrpc
