@@ -9,11 +9,11 @@ from metasploit.msfrpc import MsfRpcClient, MsfRpcError
 from metasploit.utils import parseargs
 
 __author__ = 'Nadeem Douba'
-__copyright__ = 'Copyright 2012, PyMetasploit Project'
+__copyright__ = 'Copyright 2021, PyMetasploit Project'
 __credits__ = []
 
 __license__ = 'GPL'
-__version__ = '0.1'
+__version__ = '2.0'
 __maintainer__ = 'Nadeem Douba'
 __email__ = 'ndouba@cygnos.com'
 __status__ = 'Development'
@@ -43,7 +43,7 @@ if __name__ == '__main__':
     try:
         m = MsfRpc(o.__dict__.pop('password'), **o.__dict__)
         m.interact('')
-    except MsfRpcError, m:
-        print str(m)
+    except MsfRpcError as m:
+        print(str(m))
         exit(-1)
     exit(0)

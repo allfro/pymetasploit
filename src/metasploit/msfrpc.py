@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 
-from httplib import HTTPConnection, HTTPSConnection
+from http.client import HTTPConnection, HTTPSConnection
 import ssl
 from numbers import Number
 
 from msgpack import packb, unpackb
 
 __author__ = 'Nadeem Douba'
-__copyright__ = 'Copyright 2012, PyMetasploit Project'
+__copyright__ = 'Copyright 2021, PyMetasploit Project'
 __credits__ = []
 
 __license__ = 'GPL'
-__version__ = '0.4'
+__version__ = '2.0'
 __maintainer__ = 'Nadeem Douba'
 __email__ = 'ndouba@gmail.com'
 __status__ = 'Development'
@@ -53,8 +53,6 @@ __all__ = [
     'SessionManager',
     'MsfConsole',
     'ConsoleManager',
-    'ReportFilter',
-    'ReportFilterQuery'
 ]
 
 
@@ -974,9 +972,8 @@ class Workspace(object):
         self.rpc.call(MsfRpcMethod.DbImportData, {'workspace' : self.name, 'data' : data})
 
     def importfile(self, fname):
-        r = file(fname, mode='rb')
-        self.rpc.call(MsfRpcMethod.DbImportData, {'workspace' : self.name, 'data' : r.read()})
-        r.close()
+        with open(fname, "rb") as f:
+            self.rpc.call(MsfRpcMethod.DbImportData, {'workspace': self.name, 'data': f.read()})
 
 
 class MsfManager(object):
@@ -1328,8 +1325,11 @@ class MsfModule(object):
         self.modulename = mname
         self.rpc = rpc
         self._info = rpc.call(MsfRpcMethod.ModuleInfo, mtype, mname)
+        property_attributes = ["advanced", "evasion", "options", "required", "runoptions"]
         for k in self._info:
-            setattr(self, k, self._info.get(k))
+            if k not in property_attributes:
+                # don't try to set property attributes
+                setattr(self, k, self._info.get(k))
         self._moptions = rpc.call(MsfRpcMethod.ModuleOptions, mtype, mname)
         self._roptions = []
         self._aoptions = []
@@ -1350,7 +1350,7 @@ class MsfModule(object):
         """
         All the module options.
         """
-        return self._moptions.keys()
+        return list(self._moptions.keys())
 
     @property
     def required(self):
@@ -1379,7 +1379,7 @@ class MsfModule(object):
         The running (currently set) options for a module. This will raise an error
         if some of the required options are missing.
         """
-        outstanding = set(self.required).difference(self._runopts.keys())
+        outstanding = set(self.required).difference(list(self._runopts.keys()))
         if outstanding:
             raise TypeError('Module missing required parameter: %s' % ', '.join(outstanding))
         return self._runopts
@@ -1461,14 +1461,15 @@ class MsfModule(object):
                             'Invalid payload (%s) for given target (%d).' % (payload.modulename, self.target)
                         )
                     runopts['PAYLOAD'] = payload.modulename
-                    for k, v in payload.runoptions.iteritems():
-                        if v is None or (isinstance(v, basestring) and not v):
+
+                    for k, v in payload.runoptions.items():
+                        if v is None or (isinstance(v, str) and not v):
                             continue
                         if k not in runopts or runopts[k] is None or \
-                           (isinstance(runopts[k], basestring) and not runopts[k]):
+                           (isinstance(runopts[k], str) and not runopts[k]):
                             runopts[k] = v
 #                    runopts.update(payload.runoptions)
-                elif isinstance(payload, basestring):
+                elif isinstance(payload, str):
                     if payload not in self.payloads:
                         raise ValueError('Invalid payload (%s) for given target (%d).' % (payload, self.target))
                     runopts['PAYLOAD'] = payload
@@ -1506,7 +1507,7 @@ class ExploitModule(MsfModule):
     @target.setter
     def target(self, target):
         if target not in self.targets:
-            raise ValueError('Target must be one of %s' % repr(self.targets.keys()))
+            raise ValueError('Target must be one of %s' % repr(list(self.targets.keys())))
         self._target = target
 
     def targetpayloads(self, t=0):

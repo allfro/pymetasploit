@@ -3,11 +3,11 @@
 from optparse import OptionParser
 
 __author__ = 'Nadeem Douba'
-__copyright__ = 'Copyright 2012, PyMetasploit Project'
+__copyright__ = 'Copyright 2021, PyMetasploit Project'
 __credits__ = []
 
 __license__ = 'GPL'
-__version__ = '0.1'
+__version__ = '2.0'
 __maintainer__ = 'Nadeem Douba'
 __email__ = 'ndouba@gmail.com'
 __status__ = 'Development'
@@ -26,7 +26,7 @@ def parseargs():
     p.add_option("-p", dest="port", help="Connect to the specified port instead of 55553", metavar="opt", default=55553)
     o, a = p.parse_args()
     if o.password is None:
-        print '[-] Error: a password must be specified (-P)\n'
+        print('[-] Error: a password must be specified (-P)\n')
         p.print_help()
         exit(-1)
     return o
