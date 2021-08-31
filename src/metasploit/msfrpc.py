@@ -1450,9 +1450,7 @@ class MsfModule(object):
         if isinstance(self, ExploitModule):
             payload = kwargs.get('payload')
             runopts['TARGET'] = self.target
-            if 'DisablePayloadHandler' in runopts and runopts['DisablePayloadHandler']:
-                pass
-            elif payload is None:
+            if payload is None:
                 runopts['DisablePayloadHandler'] = True
             else:
                 if isinstance(payload, PayloadModule):
