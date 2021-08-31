@@ -1462,7 +1462,7 @@ class MsfModule(object):
                         )
                     runopts['PAYLOAD'] = payload.modulename
 
-                    for k, v in list(payload.runoptions.items()):
+                    for k, v in payload.runoptions.items():
                         if v is None or (isinstance(v, str) and not v):
                             continue
                         if k not in runopts or runopts[k] is None or \
